@@ -1,8 +1,6 @@
 <div align="center">
 
-# LT2
-
-### *Linear-Time Looped Transformers*
+# LT2:Linear-Time Looped Transformers
 
 A family of **looped Transformers** with **subquadratic token mixers** —
 linear, sparse, and hybrid attention, unified within a single architecture.
