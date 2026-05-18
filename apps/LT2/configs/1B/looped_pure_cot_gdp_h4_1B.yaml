@@ -1,0 +1,125 @@
+# Looped Window Attention 1B — CoT-style Gated DeltaProduct, num_householder = 4.
+#
+# Same recipe as looped_1B_cot_gdp_h2.yaml; only ``loop_count`` differs.
+# Compute scales as O(T * N(N+1)/2) in N (~10x at N=4 vs ~3x at N=2).
+# Only intentional deviation from the reference: ``cot_gdp_allow_neg_eigval=true``.
+
+dump_dir: <DATA_ROOT>/results/looped_pure_cot_gdp_h4_1B
+name: looped_pure_cot_gdp_h4_1B
+steps: 255_000
+probe_freq: null
+seed: 777
+grad_acc_steps: 6
+gc_collect_freq: 1000
+
+optim:
+  lr: 3e-4
+  weight_decay: 0.1
+  warmup: 10000
+  lr_min_ratio: 0.000001
+  clip: 1.0
+
+distributed:
+  fsdp_type: full_shard
+  compile: true
+  model_dtype: bf16
+  matmul_allow_tf32: false
+  selective_activation_checkpointing: false
+  tp_size: 1
+  spawn_method: spawn
+
+model:
+  dim: 2048
+  n_layers: 22
+  n_heads: 8
+  vocab_size: -1
+  weight_tying: true
+  seed: 42
+  head_dim: null
+  n_kv_heads: null
+  ffn_dim_multiplier: null
+  multiple_of: 256
+  norm_eps: 1.0e-6
+  rope_theta: 10000.0
+  init_base_std: null
+  init_std_factor: "disabled"
+  max_seqlen: 4096
+
+  loop_count: 4
+  use_residual: true
+  use_block_residual: false
+
+  layer_pattern: "cot_gdp"
+
+  cot_gdp_num_heads: 8
+  cot_gdp_head_dim: 256
+  cot_gdp_expand_v: 1.0
+  cot_gdp_use_forget_gate: true
+  cot_gdp_use_gate: true
+  cot_gdp_conv_size: 4
+
+  cot_gdp_allow_neg_eigval: true
+
+data:
+  root_dir: <DATA_ROOT>/data/
+  sources:
+    fineweb_edu_100bt: 1.0
+  batch_size: 2
+  prefetch_size: 1024
+  seq_len: 4096
+  n_views: 2
+  load_async: true
+  add_bos: true
+  add_eos: true
+  tokenizer:
+    name: tiktoken
+    path: <REPO_ROOT>/tokenizer/original/tokenizer.model
+
+profiling:
+  run: false
+  mem_warmup: 0
+  mem_steps: 4
+  profile_warmup: 100
+  profile_steps: 4
+
+checkpoint:
+  dump:
+    every: 25400
+    keep: 13
+  eval:
+    every: 15000000
+    keep: -1
+
+logging:
+  freq: 10
+  wandb:
+    project: "looped_transformer"
+    name: "looped_pure_cot_gdp_h4_1B"
+
+async_eval_gpus: 8
+eval:
+  generator:
+    max_tokens: 4096
+    dtype: bf16
+    temperature: 1.0
+    top_p: 0.95
+  harness:
+    tasks:
+      - hellaswag
+      - task: boolq
+        dataset_kwargs:
+          trust_remote_code: true
+      - piqa
+      - task: social_iqa
+        dataset_kwargs:
+          trust_remote_code: true
+      - winogrande
+      - openbookqa
+      - arc_easy
+      - arc_challenge
+      - race
+      - commonsense_qa
+      - copa
+    log_samples: true
+    verbosity: "INFO"
+  validation: null

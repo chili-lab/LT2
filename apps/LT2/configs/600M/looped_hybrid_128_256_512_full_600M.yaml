@@ -1,0 +1,124 @@
+# Looped Window Attention 600M model with per-iteration attention patterns
+# Iterations 1-3: Sliding window attention graduated 128 -> 256 -> 512
+# Iteration 4: Full attention for global context
+# This demonstrates flexible per-iteration attention: SWA=128->SWA=256->SWA=512->full
+
+dump_dir: <DATA_ROOT>/results/looped_window_600M_128_256_512_full_weighted_loss
+name: looped_window_600M_128_256_512_full_weighted_loss
+steps: 255_000 # 510k steps = 10 epochs = 255000 steps
+probe_freq: null  # Disabled: OOM with looped architecture (memory multiplies by loop_count)
+seed: 777
+grad_acc_steps: 2
+gc_collect_freq: 1000
+
+optim:
+  lr: 3e-4
+  weight_decay: 0.1 
+  warmup: 5000
+  lr_min_ratio: 0.000001
+  clip: 1.0
+
+distributed:
+  fsdp_type: full_shard
+  compile: true
+  model_dtype: bf16
+  matmul_allow_tf32: false
+  selective_activation_checkpointing: false  # Enable to reduce memory for looped models
+  tp_size: 1
+  spawn_method: spawn
+
+model:
+  dim: 1024
+  n_layers: 25
+  n_heads: 16
+  vocab_size: -1  # Will be auto-set
+  weight_tying: false
+  seed: 42
+  head_dim: null
+  n_kv_heads: null
+  ffn_dim_multiplier: null
+  multiple_of: 256
+  norm_eps: 1e-5
+  rope_theta: 10000.0
+  init_base_std: null
+  init_std_factor: "disabled"
+  max_seqlen: 4096  # Will be auto-set to data.seq_len
+
+  # Looped window attention specific - Per-Iteration Pattern
+  attn_impl: "fmha"  # Required for sliding window attention support
+  loop_count: 4  # Loop through layers 4 times
+  
+  # Per-iteration attention pattern: 
+  # Iterations 1-3: Sliding window graduated 128 -> 256 -> 512
+  # Iteration 4: Full attention (global context)
+  attention_pattern: "SWA=128->SWA=256->SWA=512->full"
+  
+  default_sliding_window: 128  # Default window size (used by SWA= patterns)
+  use_residual: true  # Enable learned residual connections between iterations
+  use_block_residual: false  # Disable block residuals for per-iteration patterns
+
+data:
+  root_dir: <DATA_ROOT>/data/
+  sources:
+    fineweb_edu_100bt: 1.0
+  batch_size: 6
+  prefetch_size: 1024
+  seq_len: 4096
+  n_views: 2
+  load_async: true
+  add_bos: true
+  add_eos: true
+  tokenizer:
+    name: tiktoken
+    path: <REPO_ROOT>/tokenizer/original/tokenizer.model
+
+profiling:
+  run: true
+  mem_warmup: 0
+  mem_steps: 4
+  profile_warmup: 100
+  profile_steps: 4
+
+checkpoint:
+  dump:
+    every: 25400
+    keep: 13
+  eval:
+    every: 15000000
+    keep: -1
+
+logging:
+  freq: 10
+  wandb:
+    project: "looped_transformer"
+    name: "looped_window_600M_128_256_512_full_weighted_loss"
+
+async_eval_gpus: 4
+eval:
+    generator:
+        max_tokens: 4096  # Match your model's max_seqlen
+        dtype: bf16
+        temperature: 1.0
+        top_p: 0.95
+    # LM Evaluation Harness tasks
+    harness:
+        tasks:
+            - hellaswag
+            - task: boolq
+              dataset_kwargs:
+                  trust_remote_code: true
+            - piqa
+            - task: social_iqa
+              dataset_kwargs:
+                  trust_remote_code: true
+            - winogrande
+            - openbookqa
+            - arc_easy
+            - arc_challenge
+            - race
+            - commonsense_qa
+            - copa
+        log_samples: true
+        verbosity: "INFO"
+    # Disable validation during eval
+    validation: null

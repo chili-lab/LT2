@@ -1,0 +1,57 @@
+# Python
+__pycache__/
+*.pyc
+*.py[cod]
+*$py.class
+*.so
+*.egg-info/
+.eggs/
+build/
+dist/
+.venv/
+venv/
+env/
+.ipynb_checkpoints/
+*.ipynb
+
+# Editor / OS
+.vscode/
+.idea/
+.DS_Store
+*.swp
+*.swo
+*~
+
+# PyTorch / training artifacts
+*.pt
+*.pth
+*.bin
+*.safetensors
+*.distcp
+*.ckpt
+
+# Logs / runtime output
+slurm-*.out
+*.out
+*.err
+*.log
+wandb/
+dump_dir/
+checkpoints/
+logs/
+profiling/
+outputs/
+metrics.jsonl
+
+# Ignore results directories under apps
+apps/*/results/
+
+# Tokenizer files (downloaded, not source)
+tokenizer/
+
+# Data directory
+data/
+
+# Local env files
+.env
+.env.*

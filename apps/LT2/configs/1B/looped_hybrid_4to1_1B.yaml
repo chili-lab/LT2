@@ -1,0 +1,104 @@
+# Looped Window Attention 1B model with 4:1 window-to-full attention ratio
+# This config demonstrates a parameter-efficient architecture using layer looping
+# Effective depth: 16 layers * 3 loops = 48 layers effective depth
+# But only 16 layers of parameters!
+
+dump_dir: <DATA_ROOT>/results/looped_window_1B_4to1_100bt
+name: looped_window_1B_4to1_100bt
+steps: 255_000
+probe_freq: null
+seed: 777
+grad_acc_steps: 1
+gc_collect_freq: 1000
+
+optim:
+  lr: 3e-4
+  weight_decay: 0.033
+  warmup: 5000
+  lr_min_ratio: 0.000001
+  clip: 1.0
+
+distributed:
+  fsdp_type: full_shard
+  compile: true
+  model_dtype: bf16
+  matmul_allow_tf32: false
+  selective_activation_checkpointing: false
+  tp_size: 1
+  spawn_method: spawn
+
+model:
+  dim: 2048
+  n_layers: 16  # Physical layers (actual parameters)
+  n_heads: 16
+  vocab_size: -1  # Will be auto-set
+  weight_tying: false
+  seed: 42
+  head_dim: null
+  n_kv_heads: null
+  ffn_dim_multiplier: null
+  multiple_of: 256
+  norm_eps: 1e-5
+  rope_theta: 10000.0
+  init_base_std: null
+  init_std_factor: "disabled"
+  max_seqlen: 4096  # Will be auto-set to data.seq_len
+  
+  # Looped window attention specific
+  loop_count: 3  # Loop through layers 3 times -> 48 effective layers
+  attention_pattern: "4:1"  # 4 sliding window : 1 full attention
+  # Pattern repeats: [window, window, window, window, full, window, window, window, window, full, ...]
+  # So out of 16 layers: 13 use sliding window, 3 use full attention
+  default_sliding_window: 2048
+
+data:
+  root_dir: <DATA_ROOT>/data/
+  sources:
+    fineweb_edu_100bt: 1.0
+  batch_size: 12
+  prefetch_size: 1024
+  seq_len: 4096
+  n_views: 2
+  load_async: true
+  add_bos: true
+  add_eos: true
+  tokenizer:
+    name: tiktoken
+    path: <REPO_ROOT>/tokenizer/original/tokenizer.model
+
+profiling:
+  run: true
+  mem_warmup: 0
+  mem_steps: 4
+  profile_warmup: 100
+  profile_steps: 4
+
+checkpoint:
+  dump:
+    every: 25430
+    keep: 13
+  eval:
+    every: 1601000
+    keep: -1
+
+logging:
+  freq: 10
+  wandb:
+    project: "looped_transformer"
+    name: "looped_window_1B_4to1_100bt"
+
+async_eval_gpus: 8
+eval:
+    generator:
+        max_tokens: 2048
+        dtype: bf16
+        temperature: 1.0
+        top_p: 0.95
+    harness: null
+    validation:
+        max_steps: 1000
+        use_val_from_train_src: false
+        root_dir: <DATA_ROOT>/data/fineweb_edu_10bt_val
+        sources:
+            - ""
+

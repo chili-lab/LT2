@@ -1,0 +1,95 @@
+# Evaluation config for AUNet 1B model - clean and minimal
+name: "eval_LT2"
+dump_dir: <DATA_ROOT>/results/eval_LT2
+ckpt_dir: <DATA_ROOT>/results/looped_600M_bookend_2_looped4_window_128/checkpoints/0000254000
+
+# Generator settings for inference
+generator:
+  max_tokens: 16384  # Must be >= max value in harness.metadata.max_seq_lengths
+  dtype: bf16
+
+# LM Evaluation Harness tasks - same as eval_clean
+harness:
+  tasks:
+    - hellaswag
+    - task: boolq
+      dataset_kwargs:
+        trust_remote_code: true
+    - piqa
+    - task: sciq
+      dataset_kwargs:
+        trust_remote_code: true
+    - winogrande
+    - openbookqa
+    - arc_easy
+    - arc_challenge
+    - commonsense_qa
+    # - wikitext
+    # - lambada_openai
+    - copa
+    # NIAH tasks
+    # - task: niah_single_1
+    #   dataset_kwargs:
+    #     trust_remote_code: true
+    #     pretrained: <REPO_ROOT>/tokenizer/original
+    # - task: niah_single_2
+    #   dataset_kwargs:
+    #     trust_remote_code: true
+    #     pretrained: <REPO_ROOT>/tokenizer/original
+    # - task: niah_single_3
+    #   dataset_kwargs:
+    #     trust_remote_code: true
+    #     pretrained: <REPO_ROOT>/tokenizer/original
+    # - task: niah_multikey_1
+    #   dataset_kwargs:
+    #     trust_remote_code: true
+    #     pretrained: <REPO_ROOT>/tokenizer/original
+    # - task: niah_multikey_2
+    #   dataset_kwargs:
+    #     trust_remote_code: true
+    #     pretrained: <REPO_ROOT>/tokenizer/original
+    # - task: niah_multikey_3
+    #   dataset_kwargs:
+    #     trust_remote_code: true
+    #     pretrained: <REPO_ROOT>/tokenizer/original
+    # - task: niah_multiquery
+    #   dataset_kwargs:
+    #     trust_remote_code: true
+    #     pretrained: <REPO_ROOT>/tokenizer/original
+    # - task: niah_multivalue
+    #   dataset_kwargs:
+    #     trust_remote_code: true
+    #     pretrained: <REPO_ROOT>/tokenizer/original
+    # Ruler tasks
+    # - task: ruler_vt
+    #   dataset_kwargs:
+    #     trust_remote_code: true
+    #     pretrained: <REPO_ROOT>/tokenizer/original
+    # - task: ruler_cwe
+    #   dataset_kwargs:
+    #     trust_remote_code: true
+    #     pretrained: <REPO_ROOT>/tokenizer/original
+    # - task: ruler_fwe
+    #   dataset_kwargs:
+    #     trust_remote_code: true
+    #     pretrained: <REPO_ROOT>/tokenizer/original
+    # - task: ruler_qa_hotpot
+    #   dataset_kwargs:
+    #     trust_remote_code: true
+    #     pretrained: <REPO_ROOT>/tokenizer/original
+    # - task: ruler_qa_squad
+    #   dataset_kwargs:
+    #     trust_remote_code: true
+    #     pretrained: <REPO_ROOT>/tokenizer/original
+  # metadata:
+  #   max_seq_lengths: [4096, 8192, 16384]
+  log_samples: true
+  verbosity: "INFO"
+
+# Disable validation during eval
+validation: null
+
+# Optional logging
+# wandb:
+#   project: "lingua"
+#   name: "bflow_net_1B_1levels_regex_rate_100bt_eval"
