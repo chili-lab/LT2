@@ -1,19 +1,11 @@
 <div align="center">
 
-```
-                          ❦  ·  ❦  ·  ❦
-```
+# LT2
 
-# &mdash; LT2 &mdash;
 ### *Linear-Time Looped Transformers*
 
-*A modest treatise upon a family of* **looped Transformers** *with*
-**subquadratic token mixers** — *linear, sparse, and hybrid attention,*
-*compass'd within a single architecture.*
-
-```
-                          ❦  ·  ❦  ·  ❦
-```
+A family of **looped Transformers** with **subquadratic token mixers** —
+linear, sparse, and hybrid attention, unified within a single architecture.
 
 <p align="center">
  <img src="lingua_overview.svg" width="78%"/>
@@ -24,79 +16,61 @@
 > Official codebase accompanying the paper **"LT2: Linear-Time Looped Transformers."**
 > Built upon the [Meta Lingua](https://github.com/facebookresearch/lingua) pre-training framework.
 
-<div align="center">
+---
 
-```
-═══════════════════════════════════════════════════════════════
-```
+## 1. Architecture
 
-</div>
-
-## I. &nbsp; Of the Architecture
-
-LT2 supplanteth the multi-head attention sub-layer of a standard Looped Transformer with a
-**subquadratic token mixer**, so that each shared block becometh
+LT2 replaces the multi-head attention sub-layer of a standard Looped Transformer with a
+**subquadratic token mixer**, so that each shared block becomes
 
 $$F_\ell(h) \;=\; h' + \mathrm{FFN}_\ell(h'), \qquad h' \;=\; h + \mathrm{Mixer}_\ell(h)$$
 
-wherein `Mixer` may be any linear-attention, sparse-attention, or hybrid primitive. Looping
-reuseth the same parameters `T` times in succession, so that a block of `n_layers` attaineth
-an effective depth of `n_layers × T`.
+where `Mixer` may be any linear-attention, sparse-attention, or hybrid primitive. Looping
+reuses the same parameters `T` times in succession, so a block of `n_layers` attains an
+effective depth of `n_layers × T`.
 
-- &nbsp;**LT2-linear** &mdash; DPLR linear-attention mixers (GDN, KDA, Mamba2, HGRN2, DeltaNet, RetNet). Loop iterations turn rank-1 state updates into rank-`T` updates.
-- &nbsp;**LT2-sparse** &mdash; sliding-window, NSA, or DSA attention. A per-loop window of size `w` becometh an effective receptive field of `T·w`.
-- &nbsp;**LT2-hybrid (Full+GDN)** &mdash; interleaveth a small fraction of full attention with GDN; surpasseth the standard looped transformer at ~2.7× decode speedup, establishing a new Pareto frontier.
+- **LT2-linear** — DPLR linear-attention mixers (GDN, KDA, Mamba2, HGRN2, DeltaNet, RetNet). Loop iterations turn rank-1 state updates into rank-`T` updates.
+- **LT2-sparse** — sliding-window, NSA, or DSA attention. A per-loop window of size `w` becomes an effective receptive field of `T·w`.
+- **LT2-hybrid (Full+GDN)** — interleaves a small fraction of full attention with GDN; surpasses the standard looped transformer at ~2.7× decode speedup, establishing a new Pareto frontier.
 
-The reader is referr'd to the paper for the full theoretical analysis and experimental results.
+See the paper for the full theoretical analysis and experimental results.
 
-<div align="center">
+---
 
-```
-═══════════════════════════════════════════════════════════════
-```
-
-</div>
-
-## II. &nbsp; Of the Repository
+## 2. Repository Layout
 
 ```
 LT2/
- ├─ lingua/             ── Core training library (forked from Meta Lingua)
- │   ├─ transformer.py     · Reference Transformer block
- │   ├─ data.py            · Pre-training dataloader
- │   ├─ distributed.py     · FSDP / TP / compile wrappers
- │   ├─ checkpoint.py      · Distributed checkpointing
- │   ├─ optim.py           · Optimizer + LR scheduler
- │   └─ stool.py           · SLURM launcher
- ├─ apps/LT2/           ── LT2 application code
- │   ├─ transformer.py     · LT2 model (linear / sparse / hybrid mixers)
- │   ├─ train.py           · Training entry point
- │   ├─ eval.py            · LM-Evaluation-Harness wrapper
- │   ├─ generate.py        · Inference / generation
+ ├─ lingua/             Core training library (forked from Meta Lingua)
+ │   ├─ transformer.py     Reference Transformer block
+ │   ├─ data.py            Pre-training dataloader
+ │   ├─ distributed.py     FSDP / TP / compile wrappers
+ │   ├─ checkpoint.py      Distributed checkpointing
+ │   ├─ optim.py           Optimizer + LR scheduler
+ │   └─ stool.py           SLURM launcher
+ ├─ apps/LT2/           LT2 application code
+ │   ├─ transformer.py     LT2 model (linear / sparse / hybrid mixers)
+ │   ├─ train.py           Training entry point
+ │   ├─ eval.py            LM-Evaluation-Harness wrapper
+ │   ├─ generate.py        Inference / generation
  │   ├─ benchmark_prefill.py
  │   ├─ configs/
- │   │   ├─ 600M/          · 0.6B-parameter pre-training recipes
- │   │   └─ 1B/            · 1.3B-parameter pre-training recipes
- │   ├─ kernel/            · Custom Triton / CUDA kernels
- │   ├─ scripts/           · Helper scripts
- │   └─ slurm/             · Example SLURM job files
- ├─ setup/              ── Environment + data preparation
- ├─ tokenizer/          ── Tokenizer files (downloaded)
+ │   │   ├─ 600M/          0.6B-parameter pre-training recipes
+ │   │   └─ 1B/            1.3B-parameter pre-training recipes
+ │   ├─ kernel/            Custom Triton / CUDA kernels
+ │   ├─ scripts/           Helper scripts
+ │   └─ slurm/             Example SLURM job files
+ ├─ setup/              Environment + data preparation
+ ├─ tokenizer/          Tokenizer files (downloaded)
  └─ requirements.txt
 ```
 
-<div align="center">
+---
 
-```
-═══════════════════════════════════════════════════════════════
-```
+## 3. Quick Start
 
-</div>
-
-## III. &nbsp; Of the Quick Start
-
-The following commands launch a SLURM job that createth a Conda environment for the codebase.
-Environment creation taketh around five minutes (excluding downloads).
+The following commands launch a SLURM job that creates a Conda environment for the codebase.
+Environment creation takes around five minutes (excluding downloads).
 
 ```bash
 git clone <THIS_REPO_URL>
@@ -114,8 +88,8 @@ conda activate lingua_<date>
 ```
 
 Use the provided script to download and prepare data from HuggingFace
-(`fineweb_edu`, `fineweb_edu_10bt`, or `dclm_baseline_1.0`). The command below downloadeth
-`fineweb_edu` and prepareth it for training in `./data`, specifying the memory `terashuf`
+(`fineweb_edu`, `fineweb_edu_10bt`, or `dclm_baseline_1.0`). The command below downloads
+`fineweb_edu` and prepares it for training in `./data`, specifying the memory `terashuf`
 (the shuffling tool) is allowed to use. By default `nchunks=32`; if you train on fewer than
 32 GPUs, set `nchunks` to 1 or to the number of GPUs you have
 ([details](https://github.com/facebookresearch/lingua/issues/55#issuecomment-2483643076)).
@@ -131,8 +105,8 @@ Download the tokenizer (Llama 3):
 python setup/download_tokenizer.py llama3 <SAVE_PATH> --api_key <HUGGINGFACE_TOKEN>
 ```
 
-Now launch a quick debug job to verify the setup. *The provided configurations are
-templates &mdash; edit `dump_dir`, `data.root_dir`, `data.tokenizer.path`, etc., for your environment.*
+Now launch a quick debug job to verify the setup. The provided configurations are
+templates — edit `dump_dir`, `data.root_dir`, `data.tokenizer.path`, etc., for your environment.
 
 ```bash
 # stool = SLURM tool
@@ -148,23 +122,17 @@ torchrun --nproc-per-node 8 -m apps.LT2.train \
 python -m apps.LT2.train config=apps/LT2/configs/600M/debug.yaml
 ```
 
-If a `stool` job crasheth, it may be relaunched directly:
+If a `stool` job crashes, it may be relaunched directly:
 
 ```bash
 sbatch path/to/dump_dir/submit.slurm
 ```
 
-<div align="center">
+---
 
-```
-═══════════════════════════════════════════════════════════════
-```
+## 4. LT2 Configuration
 
-</div>
-
-## IV. &nbsp; Of the LT2 Configuration
-
-### &nbsp;&nbsp;&nbsp;&nbsp;§ Model Fields
+### Model Fields
 
 The LT2 model is configured through the `model:` section of the YAML config. Key fields:
 
@@ -174,10 +142,10 @@ The LT2 model is configured through the `model:` section of the YAML config. Key
 | `loop_count` | Number of loop iterations `T`. Effective depth is `n_layers × loop_count`. |
 | `mixer` | Token-mixer family: `full`, `window`, `gdn`, `kda`, `mamba2`, `hgrn2`, `deltanet`, `retnet`, `nsa`, `dsa`. |
 | `attention_pattern` | Depth-level hybrid layout (e.g. `"4:1"` for 4 mixer + 1 full attention). |
-| `attn_impl` | `"fmha"`, `"flex_attention"`, or `"sdpa"`. Sliding-window requireth `fmha` or `flex_attention`. |
+| `attn_impl` | `"fmha"`, `"flex_attention"`, or `"sdpa"`. Sliding-window requires `fmha` or `flex_attention`. |
 | `default_sliding_window` | Window size for sparse / sliding-window mixers. |
 | `use_residual` | Learned zero-init per-iteration residual gate across loop iterations. |
-| `gated_attn` | SDPA output gate that suppresseth the attention-sink sawtooth (§ 3.4 of the paper). |
+| `gated_attn` | SDPA output gate that suppresses the attention-sink sawtooth (§ 3.4 of the paper). |
 
 Example fragment:
 
@@ -194,11 +162,9 @@ model:
   gated_attn: true
 ```
 
-### &nbsp;&nbsp;&nbsp;&nbsp;§ Recipes Included
+### Recipes Included
 
-`apps/LT2/configs/` providest reference pre-training recipes for the experiments in the paper:
-
-<div align="center">
+`apps/LT2/configs/` provides reference pre-training recipes for the experiments in the paper:
 
 | Scale | Config | Description |
 |:---:|---|---|
@@ -208,16 +174,14 @@ model:
 | 0.6B | `600M/looped_pure_{window,nsa,dsa}_600M.yaml` | LT2-sparse single-mixer ablations. |
 | 0.6B | `600M/looped_hybrid_gdn_4to1_600M.yaml` | **LT2-hybrid (Full+GDN)**, 4:1 depth interleave. |
 | 0.6B | `600M/looped_hybrid_bookend_600M.yaml` | LT2-hybrid (Full+GDN), bookend pattern. |
-| 0.6B | `600M/looped_hybrid_128_256_512_full_600M.yaml` | Loop-level hybrid (fine &rarr; coarse). |
+| 0.6B | `600M/looped_hybrid_128_256_512_full_600M.yaml` | Loop-level hybrid (fine → coarse). |
 | 1.3B | `1B/looped_pure_{full,gdn,kda,...}_1B.yaml` | 1.3B single-mixer recipes. |
-| 1.3B | `1B/looped_hybrid_gdn_4to1_1B.yaml` | **LT2-hybrid (Full+GDN)** at 1.3B &mdash; flagship recipe. |
-
-</div>
+| 1.3B | `1B/looped_hybrid_gdn_4to1_1B.yaml` | **LT2-hybrid (Full+GDN)** at 1.3B — flagship recipe. |
 
 All recipes train on **FineWeb-Edu** at sequence length 4096 for ~100B tokens (255k steps),
 using `T = 4` loops by default.
 
-### &nbsp;&nbsp;&nbsp;&nbsp;§ Training
+### Training
 
 ```bash
 # Single-node debug
@@ -237,7 +201,7 @@ torchrun --nproc-per-node 8 -m apps.LT2.train \
     model.default_sliding_window=2048
 ```
 
-### &nbsp;&nbsp;&nbsp;&nbsp;§ Generation & Evaluation
+### Generation & Evaluation
 
 ```bash
 # Free-form generation from a checkpoint
@@ -250,9 +214,9 @@ torchrun --nproc-per-node 8 -m apps.LT2.eval \
     ckpt_dir=/path/to/checkpoint
 ```
 
-### &nbsp;&nbsp;&nbsp;&nbsp;§ Long-Context Efficiency Benchmark
+### Long-Context Efficiency Benchmark
 
-`benchmark_prefill.py` measureth prefill / decode throughput across sequence lengths:
+`benchmark_prefill.py` measures prefill / decode throughput across sequence lengths:
 
 ```bash
 python -m apps.LT2.benchmark_prefill \
@@ -262,15 +226,9 @@ python -m apps.LT2.benchmark_prefill \
 
 A reference SLURM array script is provided in `apps/LT2/slurm/benchmark_prefill_array.slurm`.
 
-<div align="center">
+---
 
-```
-═══════════════════════════════════════════════════════════════
-```
-
-</div>
-
-## V. &nbsp; Of the Configuration System
+## 5. Configuration System
 
 All scripts use [OmegaConf](https://omegaconf.readthedocs.io/) and accept dot-list overrides:
 
@@ -281,7 +239,7 @@ python -m apps.LT2.train config=apps/LT2/configs/600M/debug.yaml \
     name=my_run
 ```
 
-Resolution order: *dataclass defaults &rarr; values from `config=...` YAML &rarr; command-line overrides.*
+Resolution order: *dataclass defaults → values from `config=...` YAML → command-line overrides.*
 
 A typical `TrainArgs` YAML:
 
@@ -317,23 +275,17 @@ data:
     path: ./tokenizer/original/tokenizer.model
 ```
 
-<div align="center">
+---
 
-```
-═══════════════════════════════════════════════════════════════
-```
-
-</div>
-
-## VI. &nbsp; Of the Dump Directory
+## 6. Dump Directory
 
 ```
 example_dump_dir/
  ├─ checkpoints/
- │   └─ 0000007000/        · DCP-format checkpoint + train state
- ├─ code/                  · Snapshot of code at launch time
- ├─ logs/                  · Per-GPU stdout/stderr
- ├─ profiling/             · Memory + CPU/CUDA traces
+ │   └─ 0000007000/        DCP-format checkpoint + train state
+ ├─ code/                  Snapshot of code at launch time
+ ├─ logs/                  Per-GPU stdout/stderr
+ ├─ profiling/             Memory + CPU/CUDA traces
  ├─ base_config.yaml
  ├─ metrics.jsonl
  └─ submit.slurm
@@ -342,17 +294,11 @@ example_dump_dir/
 Checkpoints are stored in `.distcp` format and may be converted to standard PyTorch checkpoints
 via `torch.distributed.checkpoint.format_utils.dcp_to_torch_save`.
 
-<div align="center">
+---
 
-```
-═══════════════════════════════════════════════════════════════
-```
+## 7. Citation
 
-</div>
-
-## VII. &nbsp; Of the Citation
-
-Should this codebase prove of service in your own labours, kindly cite the LT2 paper:
+If this codebase is useful in your work, please cite the LT2 paper:
 
 ```bibtex
 @misc{lt2_2026,
@@ -362,7 +308,7 @@ Should this codebase prove of service in your own labours, kindly cite the LT2 p
 }
 ```
 
-This work standeth upon the shoulders of Meta Lingua:
+This work builds on Meta Lingua:
 
 ```bibtex
 @misc{meta_lingua,
@@ -374,13 +320,3 @@ This work standeth upon the shoulders of Meta Lingua:
   year   = {2024}
 }
 ```
-
-<div align="center">
-
-```
-                          ❦  ·  ❦  ·  ❦
-```
-
-*&mdash; Finis &mdash;*
-
-</div>
