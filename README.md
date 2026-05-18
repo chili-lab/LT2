@@ -5,9 +5,9 @@
 A family of **looped Transformers** with **subquadratic token mixers** —
 linear, sparse, and hybrid attention, unified within a single architecture.
 
-<p align="center">
+<!-- <p align="center">
  <img src="lingua_overview.svg" width="78%"/>
-</p>
+</p> -->
 
 </div>
 
