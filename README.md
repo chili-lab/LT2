@@ -309,12 +309,14 @@ If this codebase is useful in your work, please cite the LT2 paper:
 This work builds on Meta Lingua:
 
 ```bibtex
-@misc{meta_lingua,
-  author = {Videau, Mathurin and Idrissi, Badr Youbi and Haziza, Daniel and
-            Wehrstedt, Luca and Copet, Jade and Teytaud, Olivier and
-            Lopez-Paz, David},
-  title  = {{Meta Lingua}: A minimal {PyTorch LLM} training library},
-  url    = {https://github.com/facebookresearch/lingua},
-  year   = {2024}
+@misc{deng2026lt2lineartimeloopedtransformers,
+      title={LT2: Linear-Time Looped Transformers}, 
+      author={Chunyuan Deng and Yizhe Zhang and Rui-Jie Zhu and Yuanyuan Xu and Jiarui Liu and T. S. Eugene Ng and Hanjie Chen},
+      year={2026},
+      eprint={2605.20670},
+      archivePrefix={arXiv},
+      primaryClass={cs.LG},
+      url={https://arxiv.org/abs/2605.20670}, 
+}
 }
 ```
