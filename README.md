@@ -296,17 +296,7 @@ via `torch.distributed.checkpoint.format_utils.dcp_to_torch_save`.
 
 ## 7. Citation
 
-If this codebase is useful in your work, please cite the LT2 paper:
-
-```bibtex
-@misc{lt2_2026,
-  title  = {LT2: Linear-Time Looped Transformers},
-  author = {Anonymous},
-  year   = {2026}
-}
-```
-
-This work builds on Meta Lingua:
+If this codebase is useful in your work, the LT2 paper reference is at:
 
 ```bibtex
 @misc{deng2026lt2lineartimeloopedtransformers,
