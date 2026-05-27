@@ -27,7 +27,7 @@ where `Mixer` may be any linear-attention, sparse-attention, or hybrid primitive
 reuses the same parameters `T` times in succession, so a block of `n_layers` attains an
 effective depth of `n_layers × T`.
 
-- **LT2-linear** — DPLR linear-attention mixers (GDN, KDA, Mamba2, HGRN2, DeltaNet, RetNet). Loop iterations turn rank-1 state updates into rank-`T` updates.
+- **LT2-linear** — DPLR linear-attention mixers (GDN, KDA, RWKV7). Loop iterations turn rank-1 state updates into rank-`T` updates.
 - **LT2-sparse** — sliding-window, NSA, or DSA attention. A per-loop window of size `w` becomes an effective receptive field of `T·w`.
 - **LT2-hybrid (Full+GDN)** — interleaves a small fraction of full attention with GDN; surpasses the standard looped transformer at ~2.7× decode speedup, establishing a new Pareto frontier.
 
