@@ -294,19 +294,3 @@ via `torch.distributed.checkpoint.format_utils.dcp_to_torch_save`.
 
 ---
 
-## 7. Citation
-
-If this codebase is useful in your work, the LT2 paper reference is at:
-
-```bibtex
-@misc{deng2026lt2lineartimeloopedtransformers,
-      title={LT2: Linear-Time Looped Transformers}, 
-      author={Chunyuan Deng and Yizhe Zhang and Rui-Jie Zhu and Yuanyuan Xu and Jiarui Liu and T. S. Eugene Ng and Hanjie Chen},
-      year={2026},
-      eprint={2605.20670},
-      archivePrefix={arXiv},
-      primaryClass={cs.LG},
-      url={https://arxiv.org/abs/2605.20670}, 
-}
-}
-```
